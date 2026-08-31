@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>TAIXIU Demo - VNĐ Ảo</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#080202;--gold:#f5c653}
+html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;color:#fff;background:radial-gradient(circle at 50% 15%,#6b200d 0,#290705 38%,#080202 80%)}
+body{overflow-x:hidden}button{font:inherit;cursor:pointer}
+.app{min-height:100vh}.top{height:68px;padding:8px 12px;display:flex;align-items:center;gap:12px;background:linear-gradient(90deg,#110303,#64180c,#180403);border-bottom:1px solid #a96f25;box-shadow:0 5px 20px #000}
+.logo{display:flex;align-items:center;gap:7px}.logo-icon{font-size:29px}.logo b{display:block;color:#ffd965;font-size:19px}.logo small{color:#ad8b5b;font-size:8px}
+.user{margin-left:auto;display:flex;align-items:center;gap:7px;color:#e4c27d}.avatar,.big-avatar{display:grid;place-items:center;border-radius:50%;border:1px solid #e6b748;background:linear-gradient(#d49a37,#5d1c08)}
+.avatar{width:35px;height:35px}.wallet{display:flex;align-items:center;gap:4px;padding:8px 10px;border:1px solid #87571d;border-radius:20px;background:#150303;color:#ffd25a;font-size:13px}.wallet button{border:0;background:none;color:#ffd45b;font-size:20px}
+.nav{display:flex;gap:6px;overflow-x:auto;padding:8px;background:#100303;border-bottom:1px solid #4d180e}.nav button{flex-shrink:0;min-width:100px;padding:9px 13px;border-radius:20px;border:1px solid #68451b;background:linear-gradient(#351008,#180403);color:#c8a66b}.nav button.active{color:white;border-color:#efb849;background:linear-gradient(#cf8c30,#732407);box-shadow:0 0 14px #8b3c0e}
+.page{display:none;max-width:1200px;margin:auto;padding:10px}.page.active{display:block}
+.hero{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid #9d6722;border-radius:22px;background:radial-gradient(circle,#76250d,#2b0704 60%,#0b0202);box-shadow:0 15px 45px #000}.hero-logo{font-size:45px;color:#ffd45c;text-shadow:0 3px 12px #000}.hero h1{margin:5px;font-size:48px;color:#ffe078;text-shadow:0 4px 0 #671b07,0 0 20px #d67a1d}.hero p{color:#c3a16c}.gold{width:100%;padding:12px;border-radius:11px;border:1px solid #f1bb48;color:white;font-weight:bold;background:linear-gradient(#e2a23b,#812707)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}.card{padding:20px;text-align:center;border:1px solid #7e511d;border-radius:18px;background:linear-gradient(145deg,#481309,#170403)}.card-icon{font-size:40px}.card h2{color:#ffd25b}.card p{color:#aa8d62}.card button{width:100%;padding:10px;border-radius:10px;border:1px solid #dca33f;color:white;background:#641b08}
+.game-head{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border:1px solid #916020;border-radius:18px 18px 0 0;background:linear-gradient(90deg,#54150a,#200504,#54150a)}.game-head b{display:block;color:#ffe079;font-size:21px}.game-head small{color:#a98a5d}.timer{width:45px;height:45px;display:grid;place-items:center;border-radius:50%;border:2px solid #e3ae48;color:#ffd65e;background:#210604}
+.board{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:7px;padding:12px;border:1px solid #70491d;border-top:0;background:radial-gradient(ellipse,#53190b,#130303 75%)}.side{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;text-align:center;border:1px solid #97621f;border-radius:18px;background:linear-gradient(145deg,#4b1509,#190403);box-shadow:inset 0 0 25px #000}.side h2{margin:0;color:#ffd65c;font-size:37px;text-shadow:0 3px 7px #000}.pool{margin:13px 0;padding:8px;border-radius:18px;background:linear-gradient(#7e170f,#350603);color:#ffe29a;font-weight:bold;font-size:12px}.side button{width:85%;padding:10px;border-radius:10px;border:1px solid #eeb64a;color:white;background:linear-gradient(#dc9632,#792506)}.side small{margin-top:10px;color:#a88b62}
+.center{min-height:260px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #70491d;border-radius:20px;background:radial-gradient(circle,#42160a,#0f0202 72%)}.round{color:#b99966}.round b{color:#f1c65c}.table{width:260px;height:175px;position:relative;display:grid;place-items:center}.glow{position:absolute;width:220px;height:140px;border-radius:50%;background:radial-gradient(ellipse,#e5a32b55,transparent 70%);animation:pulse 2s infinite}
+.bowl{position:absolute;z-index:5;width:170px;height:115px;border-radius:50% 50% 45% 45%;border:4px solid #efc55c;background:linear-gradient(145deg,#ffe9a5,#cf8b28 28%,#681b08 67%,#e1a23b);box-shadow:inset 0 8px 10px #fff5,inset 0 -18px 20px #270500,0 15px 25px #000;transition:.8s;transform-origin:50% 90%}.bowl.shake{animation:shake .7s}.bowl.open{transform:translateY(-100px) rotate(-10deg);opacity:0;pointer-events:none}.bowl-lid{position:absolute;left:14px;right:14px;top:8px;height:40px;border-radius:50%;border:2px solid #ffe19a;background:radial-gradient(ellipse,#230504 0 42%,#76200b 45% 70%,#e8ae48 73%)}.bowl-rim{position:absolute;left:8px;right:8px;top:39px;height:14px;border-radius:50%;border:2px solid #ffd76b}.bowl span{position:absolute;left:0;right:0;bottom:20px;text-align:center;color:#fff0b7;font-weight:bold;text-shadow:0 2px 5px #000}
+.dice{display:flex;gap:6px;z-index:2;opacity:1;transition:.4s}.dice.hidden{opacity:0;transform:scale(.4)}.die{width:58px;height:58px;display:grid;place-items:center;border-radius:11px;border:2px solid #ff7a72;background:linear-gradient(145deg,#ff575b,#79080d);box-shadow:inset 0 -7px #58050a,0 8px 15px #000;font-size:30px}.total{color:#b99b6c}.total b{color:#ffd55c;font-size:25px}.result{margin-top:4px;color:#ffd35b;font-weight:bold}
+.bet{padding:12px;border:1px solid #71481b;border-top:0;background:#160403}.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}.chips button{padding:8px 13px;border-radius:20px;border:1px solid #73501e;background:#290a05;color:#d3af6b}.chips button.selected{color:white;border-color:#e9b447;background:linear-gradient(#d8932f,#762507)}.mybet{margin-top:8px;text-align:center;color:#aa8b5e}.mybet b{color:#ffd45b}
+.history{margin-top:10px;padding:12px;border:1px solid #6f481b;border-radius:16px;background:#160403}.history-title{color:#d9b36b;font-weight:bold;margin-bottom:9px}.balls{display:flex;flex-wrap:wrap;gap:6px}.ball{width:31px;height:31px;display:grid;place-items:center;border-radius:50%;border:1px solid #c47e27;background:#771b0f;color:#ffd35d;font-weight:bold}.ball.xiu{background:#493244;color:white}.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.actions button{padding:12px;border-radius:10px;border:1px solid #70481b;background:#1c0504;color:#d5b16d}
+.panel{margin-bottom:10px;padding:15px;border:1px solid #80531d;border-radius:18px;background:linear-gradient(145deg,#431308,#160403);box-shadow:0 12px 35px #000}.panel-title{display:flex;justify-content:space-between;padding:5px 0 13px;border-bottom:1px solid #562014;color:#ffe07a;font-size:19px}.bank{padding:28px 10px;text-align:center;border-radius:16px;background:radial-gradient(circle,#67200d,#190403)}.bank-logo{width:65px;height:65px;margin:auto;display:grid;place-items:center;border-radius:50%;border:2px solid #e2ac46;color:#fff1ad;background:linear-gradient(#d18b2a,#662008);font-weight:bold}.bank p{color:#aa895d}.bank h2{color:#f6ce64}.bank-balance small{display:block;color:#a88a60}.bank-balance strong{display:block;margin-top:4px;color:#ffe078;font-size:28px}
+input{width:100%;padding:12px;margin:6px 0;outline:none;border:1px solid #70481d;border-radius:9px;color:white;background:#170403}input:focus{border-color:#d79b38}.dark{width:100%;padding:12px;margin-top:7px;border-radius:10px;border:1px solid #70471b;background:#220705;color:#ddc08a}
+table{width:100%;border-collapse:collapse;min-width:600px}.table-wrap{overflow-x:auto}th,td{padding:11px 7px;border-bottom:1px solid #41170f;text-align:left}th{color:#cf9d52;background:#42110d}td{color:#d2c2a7}.success{color:#54d879!important}.loss{color:#ff6c65!important}.account{text-align:center}.big-avatar{width:85px;height:85px;margin:auto;font-size:38px}.account h2{color:#ffd45c}.note{color:#9d8767;font-size:12px}footer{padding:25px 10px;text-align:center;color:#705b42;font-size:10px}
+@keyframes shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-8deg) translateX(-5px)}40%{transform:rotate(8deg) translateX(5px)}60%{transform:rotate(-5deg)}80%{transform:rotate(4deg)}}@keyframes pulse{50%{transform:scale(1.15);opacity:.55}}
+@media(max-width:700px){.top{padding:7px}.logo small{display:none}.logo b{font-size:15px}.user span{display:none}.wallet{font-size:12px;padding:7px}.cards{grid-template-columns:1fr}.board{grid-template-columns:1fr 1.4fr 1fr;padding:6px}.side{min-height:230px}.side h2{font-size:27px}.pool{font-size:9px}.side button{width:96%;font-size:10px}.side small{font-size:8px}.center{min-height:245px}.table{width:145px;height:145px}.bowl{width:125px;height:87px}.die{width:41px;height:41px;font-size:22px}.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+<div class="logo"><span class="logo-icon">🎲</span><div><b>TAIXIU</b><small>MINI GAME</small></div></div>
+<div class="user"><div class="avatar">👤</div><span id="username">Khách</span></div>
+<div class="wallet">💰 <strong id="balance">100.000</strong> ₫ <button onclick="page('bank')">＋</button></div>
+</header>
+<nav class="nav">
+<button class="active" onclick="page('home',this)">TRANG CHỦ</button>
+<button onclick="page('game',this)">TÀI XỈU</button>
+<button onclick="page('bank',this)">NGÂN HÀNG</button>
+<button onclick="page('history',this)">LỊCH SỬ</button>
+<button onclick="page('account',this)">TÀI KHOẢN</button>
+</nav>
+
+<section id="home" class="page active">
+<div class="hero"><div class="hero-logo">🎴 TAIXIU</div><h1>TÀI XỈU</h1><p>PHÒNG GAME DEMO • VNĐ ẢO</p><button class="gold" onclick="page('game')">🎲 VÀO GAME</button></div>
+<div class="cards">
+<div class="card"><div class="card-icon">🎲</div><h2>TÀI XỈU</h2><p>Úp bát • Xúc xắc</p><button onclick="page('game')">CHƠI NGAY</button></div>
+<div class="card"><div class="card-icon">💰</div><h2>VNĐ ẢO</h2><p>Ngân hàng mô phỏng</p><button onclick="page('bank')">NGÂN HÀNG</button></div>
+<div class="card"><div class="card-icon">📜</div><h2>LỊCH SỬ</h2><p>Giao dịch & kết quả</p><button onclick="page('history')">XEM</button></div>
+</div>
+</section>
+
+<section id="game" class="page">
+<div class="game-head"><div><b>🎲 TÀI XỈU</b><small>PHIÊN #<span id="round">2512186</span></small></div><div class="timer"><span id="timer">20</span>s</div></div>
+<div class="board">
+<div class="side"><h2>TÀI</h2><div class="pool">1.478.246.647</div><button onclick="bet('tai')">ĐẶT CƯỢC</button><small>Người chơi: 3.980</small></div>
+<div class="center"><div class="round">PHIÊN <b>#<span id="round2">2512186</span></b></div><div class="table"><div class="glow"></div><div id="dice" class="dice hidden"><div class="die">⚄</div><div class="die">⚃</div><div class="die">⚂</div></div><div id="bowl" class="bowl" onclick="openBowl()"><div class="bowl-lid"></div><div class="bowl-rim"></div><span>ÚP BÁT</span></div></div><div class="total">TỔNG: <b id="total">?</b></div><div class="result" id="result">CHỜ KẾT QUẢ</div></div>
+<div class="side"><h2>XỈU</h2><div class="pool">1.478.246.647</div><button onclick="bet('xiu')">ĐẶT CƯỢC</button><small>Người chơi: 2.974</small></div>
+</div>
+<div class="bet"><div class="chips"><button onclick="stakeSet(1000)">1K</button><button onclick="stakeSet(5000)">5K</button><button class="selected" onclick="stakeSet(10000)">10K</button><button onclick="stakeSet(50000)">50K</button><button onclick="stakeSet(100000)">100K</button></div><div class="mybet">CƯỢC: <b id="stake">10.000 ₫</b></div></div>
+<div class="history"><div class="history-title">LỊCH SỬ PHIÊN</div><div id="balls" class="balls"></div></div>
+<div class="actions"><button onclick="page('bank')">💰 NGÂN HÀNG</button><button onclick="page('history')">📜 LỊCH SỬ</button><button onclick="page('account')">👤 TÀI KHOẢN</button></div>
+</section>
+
+<section id="bank" class="page"><div class="panel"><div class="panel-title"><span>‹</span><b>NGÂN HÀNG ẢO</b><span>×</span></div><div class="bank"><div class="bank-logo">VNĐ</div><p>TÀI KHOẢN</p><h2 id="bankUser">Khách</h2><div class="bank-balance"><small>SỐ DƯ</small><strong id="bankBalance">100.000 ₫</strong></div></div><input id="amount" type="number" placeholder="Nhập số VNĐ ảo"><button class="gold" onclick="deposit()">＋ NẠP VNĐ ẢO</button><button class="dark" onclick="withdraw()">− RÚT VNĐ ẢO</button></div></section>
+
+<section id="history" class="page"><div class="panel"><div class="panel-title"><b>LỊCH SỬ GIAO DỊCH</b><span>↻</span></div><div class="table-wrap"><table><thead><tr><th>Thời gian</th><th>Nội dung</th><th>Số tiền</th><th>Trạng thái</th></tr></thead><tbody id="transactions"></tbody></table></div></div><div class="panel"><div class="panel-title"><b>LỊCH SỬ KẾT QUẢ</b></div><div id="historyResults" class="balls"></div></div></section>
+
+<section id="account" class="page"><div class="panel account"><div class="big-avatar">👤</div><h2 id="accountName">Khách</h2><p class="note">Tài khoản demo</p></div><div class="panel"><div class="panel-title"><b>ĐĂNG KÝ TÀI KHOẢN</b></div><input id="regName" placeholder="Tên tài khoản"><input id="regPassword" type="password" placeholder="Mật khẩu"><button class="gold" onclick="register()">ĐĂNG KÝ</button><p class="note">Tài khoản và VNĐ chỉ hoạt động trong bản demo này.</p></div></section>
+<footer>TAIXIU DEMO © 2026<br>VNĐ ẢO • KHÔNG CÓ GIÁ TRỊ QUY ĐỔI</footer>
+</div>
+
+<script>
+let balance=Number(localStorage.getItem("balance"))||100000;
+let username=localStorage.getItem("username")||"Khách";
+let stake=10000,selectedBet=null,round=2512186,timer=20,results=[],transactions=[];
+const faces=["⚀","⚁","⚂","⚃","⚄","⚅"];
+function money(n){return Number(n).toLocaleString("vi-VN")}
+function save(){localStorage.setItem("balance",balance);localStorage.setItem("username",username)}
+function update(){
+document.getElementById("balance").textContent=money(balance);
+document.getElementById("bankBalance").textContent=money(balance)+" ₫";
+document.getElementById("username").textContent=username;
+document.getElementById("bankUser").textContent=username;
+document.getElementById("accountName").textContent=username;
+document.getElementById("stake").textContent=money(stake)+" ₫";
+}
+function page(id,btn){
+document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+if(btn){document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active")}
+}
+function stakeSet(value){
+stake=value;document.querySelectorAll(".chips button").forEach(x=>x.classList.remove("selected"));
+if(event&&event.currentTarget)event.currentTarget.classList.add("selected");update();
+}
+function bet(side){
+if(selectedBet){alert("Bạn đã đặt cược phiên này.");return}
+if(stake>balance){alert("Không đủ VNĐ ảo.");return}
+selectedBet=side;balance-=stake;transaction("Cược "+(side==="tai"?"Tài":"Xỉu"),-stake);
+document.getElementById("result").textContent="ĐÃ CƯỢC "+(side==="tai"?"TÀI":"XỈU");save();update();
+}
+function openBowl(){
+const bowl=document.getElementById("bowl");if(bowl.classList.contains("open"))return;
+bowl.classList.add("shake");document.getElementById("result").textContent="ĐANG LẮC BÁT...";
+setTimeout(()=>{bowl.classList.remove("shake");bowl.classList.add("open");document.getElementById("dice").classList.remove("hidden");setTimeout(roll,500)},700);
+}
+function randomDie(){return Math.floor(Math.random()*6)+1}
+function roll(){
+const a=randomDie(),b=randomDie(),c=randomDie(),total=a+b+c,side=total>=11?"tai":"xiu";
+document.getElementById("dice").innerHTML=`<div class="die">${faces[a-1]}</div><div class="die">${faces[b-1]}</div><div class="die">${faces[c-1]}</div>`;
+document.getElementById("total").textContent=total;
+document.getElementById("result").textContent=side==="tai"?"KẾT QUẢ: TÀI":"KẾT QUẢ: XỈU";
+results.unshift({total,side});if(results.length>30)results.pop();renderResults();
+if(selectedBet){
+if(selectedBet===side){const reward=stake*2;balance+=reward;transaction("Thắng "+(side==="tai"?"Tài":"Xỉu"),reward);document.getElementById("result").textContent="🎉 THẮNG +"+money(reward)+" ₫"}
+else document.getElementById("result").textContent="THUA "+money(stake)+" ₫";
+}
+selectedBet=null;round++;document.getElementById("round").textContent=round;document.getElementById("round2").textContent=round;save();update();
+}
+function renderResults(){
+document.getElementById("balls").innerHTML=results.map(x=>`<div class="ball ${x.side==="xiu"?"xiu":""}">${x.side==="tai"?"T":"X"}</div>`).join("");
+document.getElementById("historyResults").innerHTML=results.map(x=>`<div class="ball ${x.side==="xiu"?"xiu":""}">${x.total}</div>`).join("");
+}
+function transaction(text,value){transactions.unshift({time:new Date().toLocaleTimeString("vi-VN"),text,value});renderTransactions()}
+function renderTransactions(){document.getElementById("transactions").innerHTML=transactions.map(x=>`<tr><td>${x.time}</td><td>${x.text}</td><td class="${x.value>=0?"success":"loss"}">${x.value>=0?"+":""}${money(x.value)} ₫</td><td class="success">Hoàn thành</td></tr>`).join("")}
+function deposit(){const input=document.getElementById("amount"),amount=Number(input.value);if(!amount||amount<=0){alert("Nhập số VNĐ ảo hợp lệ.");return}balance+=amount;transaction("Nạp VNĐ ảo",amount);input.value="";save();update()}
+function withdraw(){const input=document.getElementById("amount"),amount=Number(input.value);if(!amount||amount<=0||amount>balance){alert("Số tiền không hợp lệ.");return}balance-=amount;transaction("Rút VNĐ ảo",-amount);input.value="";save();update()}
+function register(){const name=document.getElementById("regName").value.trim(),password=document.getElementById("regPassword").value;if(name.length<2){alert("Tên tài khoản tối thiểu 2 ký tự.");return}if(password.length<3){alert("Mật khẩu tối thiểu 3 ký tự.");return}username=name;save();update();alert("Đăng ký tài khoản demo thành công.")}
+setInterval(()=>{timer--;document.getElementById("timer").textContent=timer;if(timer<=0){timer=20;const bowl=document.getElementById("bowl");bowl.classList.remove("open");document.getElementById("dice").classList.add("hidden");document.getElementById("total").textContent="?";document.getElementById("result").textContent="CHỜ KẾT QUẢ"}},1000);
+update();renderResults();
+</script>
+</body>
+</html>
