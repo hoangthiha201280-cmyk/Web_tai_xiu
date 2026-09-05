@@ -1,0 +1,393 @@
+--==================================================
+-- TDAT K14 • FOV CIRCLE
+-- Dùng cho Roblox Studio / game bạn sở hữu
+-- Giữ nguyên Rayfield UI
+--==================================================
+
+local Rayfield = loadstring(game:HttpGet(
+    "https://sirius.menu/rayfield"
+))()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+--==================================================
+-- WINDOW
+--==================================================
+
+local Window = Rayfield:CreateWindow({
+    Name = "tdat k14 bá sàn hack",
+    LoadingTitle = "Đang tải giao diện...",
+    LoadingSubtitle = "by tdat k14",
+
+    ConfigurationSaving = {
+        Enabled = false
+    },
+
+    Discord = {
+        Enabled = false
+    },
+
+    KeySystem = false
+})
+
+--==================================================
+-- AIM SETTINGS
+--==================================================
+
+local FOVRadius = 100
+local FOVEnabled = false
+local TargetPart = "Head"
+
+--==================================================
+-- FOV CIRCLE
+--==================================================
+
+local FOVCircle
+
+pcall(function()
+    FOVCircle = Drawing.new("Circle")
+
+    FOVCircle.Visible = false
+    FOVCircle.Radius = FOVRadius
+    FOVCircle.Thickness = 2
+    FOVCircle.NumSides = 64
+    FOVCircle.Filled = false
+    FOVCircle.Transparency = 1
+    FOVCircle.Color = Color3.fromRGB(255, 255, 255)
+end)
+
+local function updateFOV()
+
+    if not FOVCircle then
+        return
+    end
+
+    local viewport = Camera.ViewportSize
+
+    FOVCircle.Position = Vector2.new(
+        viewport.X / 2,
+        viewport.Y / 2
+    )
+
+    FOVCircle.Radius = FOVRadius
+    FOVCircle.Visible = FOVEnabled
+end
+
+RunService.RenderStepped:Connect(function()
+    updateFOV()
+end)
+
+--==================================================
+-- TÌM PLAYER GẦN TÂM FOV
+--==================================================
+
+local function getClosestTarget()
+
+    local closestPlayer = nil
+    local closestDistance = FOVRadius
+
+    local center = Vector2.new(
+        Camera.ViewportSize.X / 2,
+        Camera.ViewportSize.Y / 2
+    )
+
+    for _, player in ipairs(
+        Players:GetPlayers()
+    ) do
+
+        if player ~= LocalPlayer then
+
+            local character = player.Character
+
+            if character then
+
+                local humanoid =
+                    character:FindFirstChildOfClass(
+                        "Humanoid"
+                    )
+
+                local part =
+                    character:FindFirstChild(
+                        TargetPart
+                    )
+
+                if humanoid
+                    and humanoid.Health > 0
+                    and part then
+
+                    local screenPosition,
+                        visible =
+                        Camera:WorldToViewportPoint(
+                            part.Position
+                        )
+
+                    if visible
+                        and screenPosition.Z > 0 then
+
+                        local distance =
+                            (
+                                Vector2.new(
+                                    screenPosition.X,
+                                    screenPosition.Y
+                                ) - center
+                            ).Magnitude
+
+                        if distance <
+                            closestDistance then
+
+                            closestDistance =
+                                distance
+
+                            closestPlayer =
+                                player
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+--==================================================
+-- TAB AIMBOT
+--==================================================
+
+local AimbotTab =
+    Window:CreateTab(
+        "Aimbot",
+        4483362458
+    )
+
+AimbotTab:CreateSection(
+    "Cấu Hình Ngắm (Mẫu UI)"
+)
+
+AimbotTab:CreateToggle({
+
+    Name = "Aim Scope (Tự động khóa tâm)",
+
+    CurrentValue = false,
+
+    Flag = "Toggle_AimScope",
+
+    Callback = function(Value)
+
+        Rayfield:Notify({
+
+            Title = "Aimbot UI",
+
+            Content =
+                Value
+                and "Aim Scope: BẬT"
+                or "Aim Scope: TẮT",
+
+            Duration = 2,
+
+            Image = 4483362458
+        })
+    end
+})
+
+AimbotTab:CreateToggle({
+
+    Name = "Aim Silent (Đạn tự tìm mục tiêu)",
+
+    CurrentValue = false,
+
+    Flag = "Toggle_SilentAim",
+
+    Callback = function(Value)
+
+        Rayfield:Notify({
+
+            Title = "Aimbot UI",
+
+            Content =
+                "Silent Aim: " ..
+                tostring(Value),
+
+            Duration = 2,
+
+            Image = 4483362458
+        })
+    end
+})
+
+--==================================================
+-- FOV TOGGLE
+--==================================================
+
+AimbotTab:CreateToggle({
+
+    Name = "FOV Circle",
+
+    CurrentValue = false,
+
+    Flag = "Toggle_FOV",
+
+    Callback = function(Value)
+
+        FOVEnabled = Value
+
+        updateFOV()
+
+    end
+})
+
+--==================================================
+-- FOV SLIDER
+--==================================================
+
+AimbotTab:CreateSlider({
+
+    Name = "Kích Thước Vòng FOV",
+
+    Range = {
+        10,
+        500
+    },
+
+    Increment = 5,
+
+    Suffix = "px",
+
+    CurrentValue = 100,
+
+    Flag = "Slider_FOV",
+
+    Callback = function(Value)
+
+        FOVRadius = Value
+
+        updateFOV()
+
+    end
+})
+
+--==================================================
+-- TARGET PART
+--==================================================
+
+AimbotTab:CreateDropdown({
+
+    Name = "Vị Trí Ưu Tiên Aim",
+
+    Options = {
+        "Đầu (Head)",
+        "Thân (Torso)",
+        "Gần Nhất (Closest)"
+    },
+
+    CurrentOption = {
+        "Đầu (Head)"
+    },
+
+    MultipleOptions = false,
+
+    Flag = "Dropdown_Target",
+
+    Callback = function(Option)
+
+        local selected =
+            Option[1] or Option
+
+        if selected == "Đầu (Head)" then
+
+            TargetPart = "Head"
+
+        elseif selected == "Thân (Torso)" then
+
+            TargetPart = "HumanoidRootPart"
+
+        elseif selected == "Gần Nhất (Closest)" then
+
+            TargetPart = "HumanoidRootPart"
+        end
+
+    end
+})
+
+--==================================================
+-- DEMO TARGET CHECK
+--==================================================
+
+AimbotTab:CreateButton({
+
+    Name = "Kiểm Tra Mục Tiêu Trong FOV",
+
+    Callback = function()
+
+        local target =
+            getClosestTarget()
+
+        if target then
+
+            Rayfield:Notify({
+
+                Title = "FOV Target",
+
+                Content =
+                    "Mục tiêu: " ..
+                    target.DisplayName,
+
+                Duration = 2,
+
+                Image = 4483362458
+            })
+
+        else
+
+            Rayfield:Notify({
+
+                Title = "FOV Target",
+
+                Content =
+                    "Không có người chơi trong FOV.",
+
+                Duration = 2,
+
+                Image = 4483362458
+            })
+        end
+    end
+})
+
+--==================================================
+-- CLEANUP
+--==================================================
+
+Players.PlayerRemoving:Connect(function(player)
+
+    if player == LocalPlayer then
+
+        if FOVCircle then
+
+            pcall(function()
+                FOVCircle:Remove()
+            end)
+
+        end
+    end
+end)
+
+--==================================================
+-- START
+--==================================================
+
+Rayfield:Notify({
+
+    Title = "TDAT K14",
+
+    Content =
+        "FOV Circle đã sẵn sàng!",
+
+    Duration = 3,
+
+    Image = 4483362458
+})
