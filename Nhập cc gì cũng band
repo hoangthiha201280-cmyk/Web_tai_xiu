@@ -1,0 +1,321 @@
+local Players=game:GetService("Players")
+local RunService=game:GetService("RunService")
+local LP=Players.LocalPlayer
+local Camera=workspace.CurrentCamera
+
+local S={
+ ESP=false,Box=false,Name=false,Health=false,Bone=false,Line=false,
+ FOV=false,FOVSize=100,TargetPart="Head",
+ Speed=16,Jump=50
+}
+
+local Gui=Instance.new("ScreenGui")
+Gui.Name="TDAT_UI"
+Gui.ResetOnSpawn=false
+Gui.Parent=LP:WaitForChild("PlayerGui")
+
+local Circle=Instance.new("Frame")
+Circle.AnchorPoint=Vector2.new(.5,.5)
+Circle.Position=UDim2.fromScale(.5,.5)
+Circle.Size=UDim2.fromOffset(200,200)
+Circle.BackgroundTransparency=1
+Circle.Visible=false
+Circle.Parent=Gui
+
+local Corner=Instance.new("UICorner")
+Corner.CornerRadius=UDim.new(1,0)
+Corner.Parent=Circle
+
+local Stroke=Instance.new("UIStroke")
+Stroke.Thickness=2
+Stroke.Parent=Circle
+
+local function fovUpdate()
+	Circle.Size=UDim2.fromOffset(S.FOVSize*2,S.FOVSize*2)
+	Circle.Visible=S.FOV
+end
+
+local function clearESP(char)
+	local x=char:FindFirstChild("TDAT_ESP")
+	if x then x:Destroy() end
+end
+
+local function addESP(player)
+	if player==LP then return end
+
+	local function setup(char)
+		clearESP(char)
+
+		local hum=char:WaitForChild("Humanoid",5)
+		if not hum then return end
+
+		local h=Instance.new("Highlight")
+		h.Name="TDAT_ESP"
+		h.FillTransparency=.8
+		h.OutlineTransparency=0
+		h.Enabled=S.ESP and S.Box
+		h.Adornee=char
+		h.Parent=char
+
+		local head=char:FindFirstChild("Head")
+		if head then
+			local bill=Instance.new("BillboardGui")
+			bill.Name="TDAT_INFO"
+			bill.Size=UDim2.fromOffset(160,45)
+			bill.StudsOffset=Vector3.new(0,3,0)
+			bill.AlwaysOnTop=true
+			bill.Enabled=S.ESP and (S.Name or S.Health)
+			bill.Parent=head
+
+			local text=Instance.new("TextLabel")
+			text.Size=UDim2.fromScale(1,1)
+			text.BackgroundTransparency=1
+			text.TextColor3=Color3.new(1,1,1)
+			text.TextStrokeTransparency=0
+			text.TextScaled=true
+			text.Parent=bill
+
+			RunService.RenderStepped:Connect(function()
+				if not char.Parent then
+					bill:Destroy()
+					return
+				end
+
+				bill.Enabled=S.ESP and (S.Name or S.Health)
+
+				local a=S.Name and player.DisplayName or ""
+				local b=S.Health and ("\nHP: "..math.floor(hum.Health)) or ""
+				text.Text=a..b
+			end)
+		end
+	end
+
+	if player.Character then
+		setup(player.Character)
+	end
+
+	player.CharacterAdded:Connect(setup)
+end
+
+for _,p in ipairs(Players:GetPlayers()) do
+	addESP(p)
+end
+
+Players.PlayerAdded:Connect(addESP)
+
+Players.PlayerRemoving:Connect(function(p)
+	if p.Character then
+		clearESP(p.Character)
+	end
+end)
+
+local function getTarget()
+	local best=nil
+	local dist=S.FOVSize
+	local center=Vector2.new(
+		Camera.ViewportSize.X/2,
+		Camera.ViewportSize.Y/2
+	)
+
+	for _,p in ipairs(Players:GetPlayers()) do
+		if p~=LP and p.Character then
+			local hum=p.Character:FindFirstChildOfClass("Humanoid")
+			local part=p.Character:FindFirstChild(
+				S.TargetPart=="Torso" and "HumanoidRootPart"
+				or "Head"
+			)
+
+			if hum and hum.Health>0 and part then
+				local pos,onScreen=Camera:WorldToViewportPoint(part.Position)
+
+				if onScreen and pos.Z>0 then
+					local d=(
+						Vector2.new(pos.X,pos.Y)-center
+					).Magnitude
+
+					if d<dist then
+						dist=d
+						best=p
+					end
+				end
+			end
+		end
+	end
+
+	return best
+end
+
+local Rayfield=loadstring(game:HttpGet(
+	"https://sirius.menu/rayfield"
+))()
+
+local Window=Rayfield:CreateWindow({
+	Name="tdat k14 bá sàn hack",
+	LoadingTitle="Đang tải giao diện...",
+	LoadingSubtitle="by tdat k14",
+	ConfigurationSaving={Enabled=false},
+	Discord={Enabled=false},
+	KeySystem=false
+})
+
+local A=Window:CreateTab("Aimbot")
+
+A:CreateToggle({
+	Name="Aim Scope (Tự động khóa tâm)",
+	CurrentValue=false,
+	Callback=function(v)
+		S.FOV=v
+		fovUpdate()
+	end
+})
+
+A:CreateToggle({
+	Name="FOV Circle",
+	CurrentValue=false,
+	Callback=function(v)
+		S.FOV=v
+		fovUpdate()
+	end
+})
+
+A:CreateSlider({
+	Name="Kích Thước Vòng FOV",
+	Range={10,500},
+	Increment=5,
+	Suffix="px",
+	CurrentValue=100,
+	Callback=function(v)
+		S.FOVSize=v
+		fovUpdate()
+	end
+})
+
+A:CreateDropdown({
+	Name="Vị Trí Ưu Tiên Aim",
+	Options={"Head","Torso","Closest"},
+	CurrentOption={"Head"},
+	MultipleOptions=false,
+	Callback=function(v)
+		S.TargetPart=v[1] or v
+	end
+})
+
+A:CreateButton({
+	Name="Kiểm Tra Mục Tiêu",
+	Callback=function()
+		local p=getTarget()
+		Rayfield:Notify({
+			Title="FOV",
+			Content=p and ("Mục tiêu: "..p.DisplayName)
+				or "Không có mục tiêu trong FOV",
+			Duration=2
+		})
+	end
+})
+
+local E=Window:CreateTab("ESP")
+
+E:CreateToggle({
+	Name="Player ESP",
+	CurrentValue=false,
+	Callback=function(v)
+		S.ESP=v
+		for _,p in ipairs(Players:GetPlayers()) do
+			if p~=LP and p.Character then
+				local h=p.Character:FindFirstChild("TDAT_ESP")
+				if h then h.Enabled=v and S.Box end
+			end
+		end
+	end
+})
+
+E:CreateToggle({
+	Name="Box",
+	CurrentValue=false,
+	Callback=function(v) S.Box=v end
+})
+
+E:CreateToggle({
+	Name="Name",
+	CurrentValue=false,
+	Callback=function(v) S.Name=v end
+})
+
+E:CreateToggle({
+	Name="Health",
+	CurrentValue=false,
+	Callback=function(v) S.Health=v end
+})
+
+E:CreateToggle({
+	Name="Bone",
+	CurrentValue=false,
+	Callback=function(v) S.Bone=v end
+})
+
+E:CreateToggle({
+	Name="ESP Line",
+	CurrentValue=false,
+	Callback=function(v) S.Line=v end
+})
+
+local M=Window:CreateTab("Misc")
+
+M:CreateSlider({
+	Name="WalkSpeed",
+	Range={16,100},
+	Increment=1,
+	Suffix="",
+	CurrentValue=16,
+	Callback=function(v)
+		S.Speed=v
+		local h=LP.Character and
+			LP.Character:FindFirstChildOfClass("Humanoid")
+		if h then h.WalkSpeed=v end
+	end
+})
+
+M:CreateSlider({
+	Name="JumpPower",
+	Range={50,200},
+	Increment=5,
+	Suffix="",
+	CurrentValue=50,
+	Callback=function(v)
+		S.Jump=v
+		local h=LP.Character and
+			LP.Character:FindFirstChildOfClass("Humanoid")
+		if h then h.JumpPower=v end
+	end
+})
+
+local I=Window:CreateTab("Info")
+
+I:CreateParagraph({
+	Title="TDAT K14",
+	Content=
+		"TDAT đẹp zai nhất vũ trụ\n"..
+		"DisplayName: "..LP.DisplayName.."\n"..
+		"Username: @"..LP.Name.."\n"..
+		"UserId: "..LP.UserId.."\n"..
+		"AccountAge: "..LP.AccountAge.." ngày\n"..
+		"PlaceId: "..game.PlaceId
+})
+
+RunService.RenderStepped:Connect(function()
+	fovUpdate()
+
+	local char=LP.Character
+	local hum=char and char:FindFirstChildOfClass("Humanoid")
+
+	if hum then
+		hum.WalkSpeed=S.Speed
+		hum.JumpPower=S.Jump
+	end
+end)
+
+Rayfield:Notify({
+	Title="TDAT K14",
+	Content="Script đã khởi động!",
+	Duration=3
+})
